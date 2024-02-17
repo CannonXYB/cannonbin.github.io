@@ -1,0 +1,199 @@
+.body {
+    font-size: 16px;
+    font-family: "Microsoft YaHei", Arial, Helvetica, sans-serif;
+    color: #333;
+}
+
+.header-box {
+    height: 192px;
+    line-height: 192px;
+    background: url(../images/header-bg.png) no-repeat center center;
+}
+
+.header {
+    min-width: 860px;
+    height: 137px;
+    line-height: 137px;
+}
+
+.layout {
+    max-width: 1200px;
+    padding: 0 30px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.logol {
+    width: 555px;
+    color: #333;
+    float: left;
+}
+
+.logol img {
+    width: 100%;
+    vertical-align: middle;
+}
+
+.searchr {
+    float: right;
+    width: 244px;
+    height: 88px;
+    margin-top: 20px;
+    /*background-color: brown;*/
+}
+
+.links {
+    width: 244px;
+    height: 0;
+}
+
+.links>a {
+    float: right;
+    display: block;
+    width: 68px;
+    height: 40px;
+    margin-left: 15px;
+    line-height: 40px;
+    color: #fff;
+}
+
+.search {
+    width: 244px;
+    height: 40px;
+    line-height: 40px;
+    margin-top: 8px;
+    border-radius: 1px;
+}
+
+.search>input {
+    float: left;
+    /*否则button会换行，且input会覆盖button*/
+    width: 189px;
+    height: 40px;
+    line-height: 40px;
+    padding-left: 15px;
+    padding-right: 40px;
+    color: #aeaeae;
+    border: none;
+}
+
+.search>button {
+    float: right;
+    border: 0;
+    width: 40px;
+    margin-left: -47px;
+    cursor: pointer;
+    background: #fff;
+    height: 40px;
+    line-height: 40px;
+}
+
+.search>button>img {
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+}
+
+/*-----*/
+.nav {
+    width: 100%;
+    height: 42px;
+    line-height: 42px;
+}
+
+.nav ul {
+    width: 100%;
+    height: 0;
+    margin: 0 auto;
+}
+
+.nav li {
+    float: left;
+    display: block;
+    width: 180px;
+    height: 50px;
+    z-index: 20;
+    border-top-left-radius: 1px;
+    border-top-right-radius: 1px;
+}
+
+.nav li>a {
+    line-height: 50px;
+    font-size: 18px;
+    color: #fff;
+    text-align: center;
+}
+
+.nav li:hover>a {
+    color: #034088;
+}
+
+/*鼠标悬停在a上*/
+.nav li:hover {
+    background-color: #fff;
+}
+
+/*----*/
+
+.content {
+    width: 1200px;
+    margin: 0 0;
+    line-height: normal;
+}
+
+.notice {
+    margin-left: 144px;
+    width: 1100px;
+    height: 654.4px;
+}
+
+.title {
+    margin-top: 31px;
+    padding-bottom: 10px;
+}
+
+.title>img {
+    float: left;
+    margin-right: 8px;
+    margin-top: -6px;
+}
+
+.title h2 {
+    color: #003f88;
+}
+
+/*以下是建模动态*/
+.block_l {
+    float: left;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 530px;
+    height: 350px;
+}
+
+.block_l h3 {
+    color: #003f88;
+    text-align: center;
+}
+
+.block_r {
+    float: right;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 530px;
+    height: 350px;
+}
+
+.block_r h3 {
+    color: #003f88;
+    text-align: center;
+}
+
+.block_r h1 {
+    color: blue;
+    text-align: center;
+    line-height: 350px;
+}
+.title pre {
+    margin-top: 15px;
+}
