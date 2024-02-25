@@ -5,6 +5,8 @@
 }
 
 .header-box {
+    width: 100%;
+    min-width: 1300px;
     height: 192px;
     line-height: 192px;
     background: url(../images/header-bg.png) no-repeat center center;
