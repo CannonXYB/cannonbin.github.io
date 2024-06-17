@@ -59,10 +59,610 @@
             </div>
         </div>
     </div>
+
     <!---->
-    <div class="content">
-        <h1>还在建设中..</h1>
+    <div class="content" name="disableCopyPaste">
+        <h3>均值移除，标准化：</h3>
+        <br>
+        <p class="explain">
+            <h4>&emsp;解说</h4>
+        看相似度，让样本矩阵变成均值为0，标准差为1的数据集合。<br>
+        如果有一列特征值表示<br>
+        #均值移除，标准化：年龄 17 20 23<br>
+        mean = (17 + 20 + 23)/3 = 20<br>
+        a1 = -3<br>
+        b1 = 0<br>
+        c1 = 3<br>
+        s1 = std(a1,b1,c1)<br>
+        print(a1/s1, b1/s1, c1/s1)<br>
+        <br>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        # scale函数用于对函数进行预处理，实现均值移除<br>
+        # array是原数组，A为array均值移除后的效果<br>
+        A = sp.scale(array)<br>
+        </p>
+        <br>
+        <h4>对样本矩阵的说明：一行一样本，一列一特征</h4>
+        <br>
+        <p class="code">
+            <h4>&emsp;举例</h4>
+            import numpy as np<br>
+            import sklearn.preprocessing as sp<br>
+            raw_samples = np.array([<br>
+            [17.,100.,4000.],<br>
+            [20.,80.,5000.],<br>
+            [23.,75.,5500.]<br>
+            ])<br>
+            std_samples = sp.scale(raw_samples)<br>
+            print(std_samples)<br>
+            print(std_samples.mean(axis=0)) #求均值：0<br>
+            print(std_samples.std(axis=0)) #求标准差:1<br>
+        </p>
     </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>范围缩放：把特征值放到[0,1],最小是0，最大是1：</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        minmax缩放器：mms = sp.MinMaxScaler(feature_range=(0,1))<br>
+        调用mms对象：result = mms.fit_transform(原始数据)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        raw_samples = np.array([<br>
+        [17.,100.,4000.],<br>
+        [20.,80.,5000.],<br>
+        [23.,75.,5500.]<br>
+        ])<br>
+        mms = sp.MinMaxScaler(feature_range=(0,1))<br>
+        result = mms.fit_transform(raw_samples)<br>
+        print(result)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>归一化：当每个特征值的占比更加重要的时候，每行进行归一化</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        # array 原始样本矩阵<br>
+        # norm 范数：<br>
+        # l1 - l1 范数，向量中每个元素的绝对值之和<br>
+        # l2 - l2 范数，向量中每个元素平方和之和<br>
+        #返回归一化预处理后的样本矩阵<br>
+        sp.normalize(array, norm='l1')<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        ary = np.array([[10,21,5],<br>
+                        [2,4,1],<br>
+                        [11,18,18]])<br>
+        result = sp.normalize(ary,norm='l1')<br>
+        print(result)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        # 给出阈值，获取二值化器<br>
+        bin = sp.Binarizer(threshold = 阈值)<br>
+        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
+        result = bin.transform(原始图片样本转化的矩阵)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        ary = np.array([[10,21,5],<br>
+        [2,4,1],<br>
+        [11,18,18]])<br>
+        bin = sp.Binarizer(threshold = 10)<br>
+        result = bin.transform(ary)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>独热编码（One-hot Encoding）：为样本特征的每个值编码</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说<br>
+        两个数&emsp; 三个数 &emsp;四个数<br>
+        1（第0）&emsp; 3（第2）&emsp; 2（第5）<br>
+        7（第1）&emsp; 5（第3）&emsp; 4（第6）<br>
+        1&emsp;&emsp;&emsp;&emsp; 8（第4）&emsp; 6（第7）<br>
+        7&emsp;&emsp;&emsp;&emsp; 3&emsp;&emsp;&emsp;&emsp; 9（第8）<br>
+        转化<br>
+        1~ 10 3~ 100 2~ 1000<br>
+        7~ 01 5~ 010 4~ 0100<br>
+        8~ 001 6~ 0010<br>
+        9~ 0001
+        得到 使用场景：计算相似度<br>
+        101001000<br>
+        010100100<br>
+        100010010<br>
+        011000001<br></h4>
+
+        # 创建一个独热编码器：<br>
+        # sparse： 是否采用紧缩格式 ，即稀疏矩阵<br>
+        # dtype： 数据类型<br>
+        ohe = sp.OneHotEncoder(sparse = ,dtype = ) 训练得到编码字典,升级后变成了sparse_output<br>
+        #对原始样本矩阵进行处理，返回独热编码后的样本矩阵<br>
+        encoder_dict = ohe.fit(原始样本矩阵)<br>
+        result = ohe.fit_transform(原始样本矩阵)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        samples = np.array([[1,3,2],<br>
+        [7,5,4],<br>
+        [1,8,6],<br>
+        [7,3,9]])<br>
+        ohe = sp.OneHotEncoder(sparse_output = True ,dtype = 'int32')<br>
+        result = ohe.fit_transform(samples)<br>
+        print(result, type(result))<br>
+        </p>
+
+        <h4>对输出的说明：需要对照这一块最上面的蓝色解说</h4>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>标签编码：根据位置，为制定一个数字标签，用于提供给基于数值算法的数学模型</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        按照顺序给一些文字的特征赋值，每一列一个标签编码和对象；<br>
+        # 获取标签编码器：<br>
+        lbe = sp.LabelEncoder()<br>
+        #调用标签编码器的fit_transform方法训练并且为原始样本进行标签编码<br>
+        result = lbe.fit_transform(原始样本特征数组)<br>
+        # 根据标签编码结果矩阵反查字典，得到原始数据矩阵<br>
+        samples = lbe.inverse_transform(result)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        raw_samples = np.array(['audi','ford','audi','toyota','ford','bmw','ford','redflag','audi'])<br>
+        print(raw_samples)<br>
+        lbe = sp.LabelEncoder()<br>
+        result = lbe.fit_transform(raw_samples)<br>
+        print(result)<br>
+        test = [0,0,1,1,4]<br>
+        print(lbe.inverse_transform(test)) # 转换成开始的定义<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>线性回归（1）：</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        预测函数， y = f(x)<br>
+        所谓模型训练，就是根据已知的x和y，找到最佳的模型参数w0和w1，尽可能精确地描述输入和输出的关系<br>
+        单样本误差： 根据预测函数求出输入为x时的预测值：y' = w0 + w1x，单样本误差为1/2(y'-y)^2。<br>
+        总样本误差： 单样本误差的和<br>
+        损失函数： loss = 1/2(w0 + w1x -y)^2 （这里1/2只是为了计算方便）<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例（损失函数）</h4>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        <br>
+        xs = np.array([0.5, 0.6, 0.8, 1.1, 1.4])<br>
+        ys = np.array([5.0, 5.5, 6.0, 6.8, 7.0])<br>
+        n = 500<br>
+        w0_grid,w1_grid = np.meshgrid(np.linspace(-10, 10, n),np.linspace(-10, 10, n))<br>
+        loss = 0<br>
+        for x,y in zip(xs,ys):<br>
+        loss += (w0_grid + w1_grid * x - y)**2 / 2<br>
+        <br>
+        # 画图：<br>
+        fig = mp.figure('Loss Function', facecolor='lightgray')<br>
+        ax3d = fig.add_subplot(projection='3d')<br>
+        ax3d.set_xlabel('w0')<br>
+        ax3d.set_ylabel('w1')<br>
+        ax3d.set_zlabel('loss')<br>
+        ax3d.plot_surface(w0_grid, w1_grid, loss, cstride=30, rstride=30, cmap='jet')<br>
+        mp.tight_layout()<br>
+        mp.show()  # 图中要找到损失函数的最低点，可以试试两个偏导<br>
+
+        <h4>&emsp;举例（梯度下降）</h4>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        
+        train_x = np.array([0.5, 0.6, 0.8, 1.1, 1.4])<br>
+        train_y = np.array([5.0, 5.5, 6.0, 6.8, 7.0])<br>
+        
+        w0, w1, epoches = [1], [1], []<br>
+        times = 1000 #梯度下降次数<br>
+        lrate = 0.01 #learning rate<br>
+        losses = []<br>
+        for i in range(1, times + 1):<br>
+        epoches.append(i)<br>
+        #求损失值<br>
+        loss = ((w0[-1] + w1[-1] * train_x - train_y)**2).sum()<br>
+        losses.append(loss)<br>
+        print('{:4}> w0={:.8f}, w1={:.8f}, loss={:.8f}'.format(i,w0[-1],w1[-1],loss))<br>
+        #求损失函数关于w0,w1的偏导数，更新模型参数<br>
+        d0 = (w0[-1] + w1[-1] * train_x - train_y).sum()<br>
+        d1 = (train_x * (w0[-1] + w1[-1] * train_x - train_y)).sum()<br>
+        #梯度下降公式<br>
+        w0.append(w0[-1] - lrate * d0)<br>
+        w1.append(w1[-1] - lrate * d1)<br>
+        print("w0:",w0[-1])<br>
+        print("w1:",w1[-1]) # y = w0 + w1 * x<br>
+        #绘制回归线<br>
+        linex = np.linspace(train_x.min(), train_x.max(), 100)<br>
+        liney = w1[-1] * linex + w0[-1]<br>
+        <br>
+        #画图：<br>
+        mp.figure('Linear Regression', facecolor='lightgray')<br>
+        mp.title('Linear Regression', fontsize = 18)<br>
+        mp.grid(linestyle=":")<br>
+        mp.scatter(train_x, train_y, s=80, marker='o', color='dodgerblue',label='Samples')<br>
+        mp.plot(linex, liney, color='orangered', linewidth=2, <br>label='Regression Line')<br>
+        mp.legend() #图例<br>
+        <br>
+        # 训练过程图，看到训练次数的上限：<br>
+        mp.figure('training progress', facecolor='lightgray')<br>
+        mp.title('Training Progress',fontsize=18)<br>
+        mp.subplot(311) # 3行1列第一幅<br>
+        mp.grid(linestyle=':')<br>
+        mp.plot(epoches, w0[:-1], color='dodgerblue', label=r'$w_0$')<br>
+        mp.legend()<br>
+        <br>
+        mp.subplot(312) # 3行1列第一幅<br>
+        mp.grid(linestyle=':')<br>
+        mp.plot(epoches, w1[:-1], color='dodgerblue', label=r'$w_1$')<br>
+        mp.legend()<br>
+        mp.tight_layout()<br>
+        <br>
+        mp.subplot(313) # 3行1列第一幅<br>
+        mp.grid(linestyle=':')<br>
+        mp.plot(epoches, losses, color='orangered', label=r'$loss$')<br>
+        mp.legend()<br>
+        mp.tight_layout()<br>
+        <br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>线性回归（2）API：</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        import sklearn.linear_model as lm<br>
+        # 创建模型<br>
+        model = lm.LinearRegression()<br>
+        # 训练模型<br>
+        # 输入为一个二维数组表示的样本矩阵<br>
+        # 输出为每个样本最终的结果<br>
+        model.fit(input, output) <br>
+        # input是一个m*n的矩阵，output是一个m*1的矩阵<br>
+        # 预测输出<br>
+        # 输入array是一个二维数组，<b>每一行一个样本，每一列是一个特征</b><br>
+        result = model.predict(array)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        import sklearn.linear_model as lm<br>
+        <br>
+        # 采集数据 读取文本 整理输入（二维）输出（一维） 构建线性回归模型，训练，返回结果<br>
+        x,y = np.loadtxt('name_of_file',delimiter=',',unpack=True)<br>
+        x = x.reshape(-1,1) # 变成n行一列<br>
+        mp.figure('Linear Regression', facecolor='lightgray')<br>
+        mp.title('Linear Regression', fontsize=18)<br>
+        mp.grid(linestyle=":")<br>
+        mp.scatter(x, y, s=70, color='dodgerblue', label= 'Sample Points')<br>
+        <br>
+        model = lm.LinearRegression()<br>
+        model.fit(x,y)<br>
+        pred_y = model.predict(x)<br>
+        mp.plot(x, pred_y, color='orangered', label='Regression Line')<br>
+        <br>
+        mp.legend()<br>
+        mp.show()<br>
+        <br>
+        # 评估训练结果的误差（metrics）：<br>
+        import sklearn.meyrics as sm<br>
+        # 平均绝对值误差: (|实际输出-预测输出|.mean())<br>
+        sm.mean_absolute_error(y, pred_y)<br>
+        # 平均平方误差:sqrt((|实际输出-预测输出|^2.mean()))<br>
+        sm.mean_squard_error(y, pred_y)<br>
+        # 中位绝对值误差<br>
+        sm.median_absolute_error(y, pred_y)<br>
+        # R^2<br>
+        sm.r2_score(y, pred_y)<br>
+        # 用print进行输出<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>岭回归(LASSO)</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        当存在异常样本的时候，给损失函数加正则项，限制模型参数对异常样本的匹配程度<br>
+        import sklearn.linear_model as lm<br>
+        # 创建模型<br>
+        model = lm.Ridge(正则强度（需要调参！）,fit_intercept=是否训练拮据,
+        max_iter=最大迭代次数（通过loss函数判断）)<br>
+        # 训练模型<br>
+        # 训练一个二维数组表示的样本矩阵<br>
+        # 输出为每个样本最终的结果<br>
+        model.fit(输入，输出)<br>
+        # 预测输出<br>
+        # 输入array是一个二维数组，每一行一个样本，一列一个特征<br>
+        result = mdoel.predict(array)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        import sklearn.linear_model as lm<br>
+        import sklearn.metrics as sm<br>
+        <br>
+        # 采集数据 读取文本 整理输入（二维）输出（一维） 构建线性回归模型，训练，返回结果<br>
+        x,y = np.loadtxt('name_of_file',delimiter=',',unpack=True)<br>
+        x = x.reshape(-1,1) # 变成n行一列<br>
+        mp.figure('Ridge Regression', facecolor='lightgray')<br>
+        mp.title('Ridge Regression', fontsize=18)<br>
+        mp.grid(linestyle=":")<br>
+        mp.scatter(x, y, s=70, color='dodgerblue', label= 'Sample Points')<br>
+        <br>
+        model = lm.Ridge(100,fit_intercept=True,max_iter=100)<br>
+        # 第一项为0则和线性回归一样，太大那么忽略的合理值太多也不合适<br>
+        model.fit(x,y)<br>
+        pred_y = model.predict(x)<br>
+        print(sm.r2_score(y, pred_y))<br>
+        mp.plot(x, pred_y, color='orangered', label='Ridge')<br>
+        <br>
+        mp.legend()<br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>多项式回归：（更好拟合，用多项式回归器）</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        import sklearn.pipeline as pl<br>
+        import sklearn.preprocessing as sp<br>
+        import sklearn.linear_model as lm<br>
+        # 同样用LinearRegression模型对样本数据进行模型训练，扩展特征，让x^n记为自变量xn<br>
+        model = pl.make_pipeline(sp.PolynomialFeatures(10),lm.LinearRegression())<br>
+        # 前者是多项式特征扩展器，后一个是线性回归器<br>
+        # 欠拟合：模型过于简单，无法给出足够高的预测精度<br>
+        # 过拟合：模型复杂，训练数据精度高，测试数据精度低<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        import sklearn.linear_model as lm<br>
+        import sklearn.pipeline as pl<br>
+        import sklearn.preprocessing as sp<br>
+        import sklearn.metrics as sm<br>
+        <br>
+        # 采集数据 读取文本 整理输入（二维）输<br>
+        # 出（一维） 构建线性回归模型，训练，返回结果<br>
+        x,y = np.loadtxt('name_of_file',delimiter=',',unpack=True)<br>
+        x = x.reshape(-1,1) # 变成n行一列<br>
+        mp.figure('Linear Regression', facecolor='lightgray')<br>
+        mp.title('Linear Regression', fontsize=18)<br>
+        mp.grid(linestyle=":")<br>
+        mp.scatter(x, y, s=70, color='dodgerblue', label= 'Sample Points')<br>
+        <br>
+        model = pl.make_pipeline(sp.PolynomialFreatures(10),lm.LinearRegression())<br>
+        model.fit(x,y)<br>
+        pred_y = model.predict(x.reshape(-1,1)) #这里也是要一列，上面的linspace是一行<br>
+        print(sm.median_absolute_error(y,pred_y))<br>
+        print(sm.r2_score(y, pred_y))<br>
+        # 预测500个函数结果，按顺序连线<br>
+        x = np.linspace(x.min(),x.max(),500)<br>
+        pred_y = model.predict(x)<br>
+        mp.plot(x, pred_y, color='orangered')<br>
+        <br>
+        mp.legend()<br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>决策树：相似输入产生相似输出</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        # 连续数据离散化，树的结构分类，随着子表的划分，那么就可以不断减少信息熵<br>
+        # 工程优化：降低决策树层数，在精确度可以接受的情况下提高性能，优先选择减少信息熵作为划分子表的依据<br>
+        # 允许混杂一些不同的特征值<br>
+        <br>
+        import sklearn.tree as st<br>
+        #创建决策树回归模型，决定最大深度<br>
+        model = st.DecisionTreeRegressor(max_depth=4)<br>
+        #训练模型<br>
+        # train_x :二维数组样本数据<br>
+        # train_y :训练集中对应每行样本的结果<br>
+        model.fit(train_x,train_y)<br>
+        #测试模型<br>
+        pred_text_y = model.predict(test_x)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.datasets as sd<br>
+        import sklearn.utils as su<br>
+        #加载波士顿地区的房价数据集（版本不支持，看B站视频
+        https://www.bilibili.com/video/BV1a44y1J7xK）<br>
+        boston = sd.load_boston()<br>
+        print(boston.data.shape) # 输入数据<br>
+        print(boston.target.shape) # 输出结果<br>
+        print(boston.feature_names) # 输入数据的特征名<br>
+        <br>
+        # 打乱原始数据集，拆分训练集和测试集<br>
+        # random_state:随机种子，使用相同的随机种子多次打乱得到的结果是一样的<br>
+        x,y = su.shuffle(boston.data, boston.target, random_state = 7)
+        train_size = int(len(x) * 0.8)<br>
+        train_x, test_x, train_y, test_y = \<br>
+        x[:train_size],x[train_size:],y[:train_size],y[train_size:]<br>
+        <br>
+        # 构建决策树模型<br>
+        import sklearn.tree as st<br>
+        import sklearn.metrics as sm<br>
+        model = st.DecisionTreeRegressor(max_depth=4)<br>
+        model.fit(train_x,train_y)<br>
+        pred_test_y = model.predict(test_x)<br>
+        # 评估结果<br>
+        r = sm.r2_score(test_y, pred_test_y)<br>
+        print(r)<br>
+        print(sm.median_absolute_error(test_y,pred_test_y))<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        # 给出阈值，获取二值化器<br>
+        bin = sp.Binarizer(threshold = 阈值)<br>
+        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
+        result = bin.transform(原始图片样本转化的矩阵)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        ary = np.array([[10,21,5],<br>
+        [2,4,1],<br>
+        [11,18,18]])<br>
+        bin = sp.Binarizer(threshold = 10)<br>
+        result = bin.transform(ary)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        # 给出阈值，获取二值化器<br>
+        bin = sp.Binarizer(threshold = 阈值)<br>
+        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
+        result = bin.transform(原始图片样本转化的矩阵)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        ary = np.array([[10,21,5],<br>
+        [2,4,1],<br>
+        [11,18,18]])<br>
+        bin = sp.Binarizer(threshold = 10)<br>
+        result = bin.transform(ary)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        # 给出阈值，获取二值化器<br>
+        bin = sp.Binarizer(threshold = 阈值)<br>
+        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
+        result = bin.transform(原始图片样本转化的矩阵)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        ary = np.array([[10,21,5],<br>
+        [2,4,1],<br>
+        [11,18,18]])<br>
+        bin = sp.Binarizer(threshold = 10)<br>
+        result = bin.transform(ary)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        # 给出阈值，获取二值化器<br>
+        bin = sp.Binarizer(threshold = 阈值)<br>
+        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
+        result = bin.transform(原始图片样本转化的矩阵)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp<br>
+        ary = np.array([[10,21,5],<br>
+        [2,4,1],<br>
+        [11,18,18]])<br>
+        bin = sp.Binarizer(threshold = 10)<br>
+        result = bin.transform(ary)<br>
+        </p>
+    </div>
+
+    <div class="content">
+        <h1>剩下的还要继续学习！</h1>
+    </div>
+
+    <script>
+        window.onload = function ()
+        {
+            // 获取要禁用复制/粘贴的元素
+            var element = document.getElementsByTagName("div");
+            for (var i = 0; i < 100; i++)
+            {
+                element[i].oncopy = function ()
+                {
+                    return false;
+                }
+
+                element[i].onselectstart = function ()
+                {
+                    return false;
+                }
+
+                element[i].oncontextmenu = function ()
+                {
+                    return false;
+                }
+            }
+        }
+    </script>
 </body>
 
 </html>
