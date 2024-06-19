@@ -525,7 +525,7 @@
         <br>
         # 打乱原始数据集，拆分训练集和测试集<br>
         # random_state:随机种子，使用相同的随机种子多次打乱得到的结果是一样的<br>
-        x,y = su.shuffle(boston.data, boston.target, random_state = 7)
+        x,y = su.shuffle(boston.data, boston.target, random_state = 7)<br>
         train_size = int(len(x) * 0.8)<br>
         train_x, test_x, train_y, test_y = \<br>
         x[:train_size],x[train_size:],y[:train_size],y[train_size:]<br>
@@ -544,71 +544,203 @@
     </div>
 
     <div class="content" name="disableCopyPaste">
-        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <h3>集合算法：</h3>
         <br>
         <p class="explain">
         <h4>&emsp;解说</h4>
-        # 给出阈值，获取二值化器<br>
-        bin = sp.Binarizer(threshold = 阈值)<br>
-        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
-        result = bin.transform(原始图片样本转化的矩阵)<br>
+        # 根据多个模型给出的预测结果，利用平均或者投票的方法得出最后的预测结果（基于决策树）<br>
+        # 正向激励：随机分配权重，提供预测输出的时候加权平均产生预测值<br>
+        # 代入训练集对于差距大的样本形成第二棵决策树<br>
+        import sklearn.tree as st<br>
+        import sklearn.ensemble as se<br>
+        # model：决策树模型<br>
+        model = st.DecisionTreeRegressor(max_depth=4)<br>
+        # 自适应增强决策树的回归模型<br>
+        # n_estimators=400：构建400棵不同权重的决策树，训练模型<br>
+        model = se.AdaBoostRegressor(model, n_estimators=400, random_state=7)<br>
+        # 训练模型<br>
+        model.fit(train_x,train_y)<br>
+        # 测试模型<br>
+        pred_test_y = model.predict(test_x)<br>
         </p>
         <br>
         <p class="code">
         <h4>&emsp;举例</h4>
         import numpy as np<br>
-        import sklearn.preprocessing as sp<br>
-        ary = np.array([[10,21,5],<br>
-        [2,4,1],<br>
-        [11,18,18]])<br>
-        bin = sp.Binarizer(threshold = 10)<br>
-        result = bin.transform(ary)<br>
+        import sklearn.datasets as sd<br>
+        import sklearn.utils as su<br>
+        import sklearn.ensemble as se<br>
+        #加载波士顿地区的房价数据集（版本不支持，看B站视频
+        https://www.bilibili.com/video/BV1a44y1J7xK）<br>
+        boston = sd.load_boston()<br>
+        print(boston.data.shape) #输入数据<br>
+        print(boston.target.shape) #输出结果<br>
+        print(boston.feature_names) #输入数据的特征名<br>
+        <br>
+        #打乱原始数据集，拆分训练集和测试集<br>
+        #random_state:随机种子，使用相同的随机种子多次打乱得到的结果是一样的<br>
+        x,y = su.shuffle(boston.data, boston.target, random_state = 7)<br>
+        train_size = int(len(x) * 0.8)<br>
+        train_x, test_x, train_y, test_y = \<br>
+        x[:train_size],x[train_size:],y[:train_size],y[train_size:]<br>
+        <br>
+        #构建决策树模型<br>
+        import sklearn.tree as st<br>
+        import sklearn.metrics as sm<br>
+        model = st.DecisionTreeRegressor(max_depth=4)<br>
+        model.fit(train_x,train_y)<br>
+        pred_test_y = model.predict(test_x)<br>
+        #评估结果<br>
+        r = sm.r2_score(test_y, pred_test_y)<br>
+        print(r)<br>
+        print(sm.median_absolute_error(test_y,pred_test_y))<br>
+        <br>
+        se.AdaBoostRegressor(model, n_estimators=400, random_state=7)<br>
+        #两个参数需要手动调参，第一个数量多时间长<br>
+        model.fit(train_x,train_y)<br>
+        pred_test_y = model.predict(test_x)<br>
+        r = sm.r2_score(test_y,pred_test_y)<br>
+        print(r)<br>
+        print(sm.median_absolute_error(test_y,pred_test_y))<br>
+        </p>
+        <br>
+        <h4>https://blog.csdn.net/weixin_42163563/article/details/131673800</h4>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>特征重要性：</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        获取样本矩阵特征重要性：<br>
+        model.fit(train_x, train_y)<br>
+        fi = model.feature_importances_<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        <b>接上集合算法的代码</b><br>
+        <br>
+        import matplotlib.pyplot as mp<br>
+        mp.figure('Feature Importances',facecolor='lightgray')<br>
+        mp.subplot(211)<br>
+        mp.title('DT Feature Importances',fontsize=16)<br>
+        mp.ylabel('Feature Importance',fontsize=14)<br>
+        mp.grid(linestyle=":",axis=1)<br>
+        x = np.arange(dt_fi.size)<br>
+        mp.bar(x, dt_fi, 0.8, color='dodgerblue', lable='...')<br>
+        # 对fi排序<br>
+        sorted_induces = dt_fi.argsort()[::-1]<br>
+        dt_fi = ada_fi[sorted_indices]<br>
+        # x刻度线处理<br>
+        mp.xticks(x, names[sorted_indices])<br>
+        mp.legend()<br>
+        mp.tight_layout()<br>
+        mp.show()<br>
         </p>
     </div>
 
     <div class="content" name="disableCopyPaste">
-        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <h3>自助聚合和随机森林</h3>
         <br>
         <p class="explain">
         <h4>&emsp;解说</h4>
-        # 给出阈值，获取二值化器<br>
-        bin = sp.Binarizer(threshold = 阈值)<br>
-        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
-        result = bin.transform(原始图片样本转化的矩阵)<br>
+        后者的效果更好所以一般就用随机森林，提高泛化特性<br>
+        个人认为，集合算法是把在后续分类中，把偏差大的重新考虑一种分类方式，而随机森林只是为了让分类层数尽可能少。<br>
+        <br>
+        import sklearn.ensemble as se<br>
+        # 随机森林回归模型<br>
+        # max_depth:决策树最大深度为10<br>
+        # n_estimators:构建1000棵决策树，训练模型<br>
+        # min_sample_split:子表中最小样本数，小于该数字后不再继续向下拆分<br>
+        model = se.RandomForestRegressor \<br>
+        (max_depth=10, n_estimator=1000, min_samples_split=2)<br>
         </p>
         <br>
         <p class="code">
         <h4>&emsp;举例</h4>
         import numpy as np<br>
-        import sklearn.preprocessing as sp<br>
-        ary = np.array([[10,21,5],<br>
-        [2,4,1],<br>
-        [11,18,18]])<br>
-        bin = sp.Binarizer(threshold = 10)<br>
-        result = bin.transform(ary)<br>
+        import sklearn.utils as su<br>
+        import sklearn.ensemble as se<br>
+        import sklearn.metrics as sm<br>
+        import matplotlib.pyplot as mp<br>
+        <br>
+        data = []<br>
+        with open('url_of file.csv','r') as f:<br>
+        for line in f.readlines():<br>
+        data.append(line[:-1].split(','))<br>
+        print(data) #会把标题行也放进来，还有末尾一位的\n，所以有[:-1]<br>
+        header = np.array(data[0][2:13]) #切位置<br>
+        # data = np.array(data[1:][2:13])[:,2:13] #取有用数据<br>
+        # data = data.astype('f8')<br>
+        # print(header.shape, header.dtype)<br>
+        # print(data.shape,data.dtype)<br>
+        x = np.array(data[1:])[:,2:13].astype('f8')<br>
+        y = np.array(data[1:])[:,-1].satype('f8')<br>
+        # 打乱数据集，拆分训练集和测试集<br>
+        su.shuffle(x, y, random_state=7)<br>
+        train_size = int(len(x)*0.9)<br>
+        train_x, test_x, train_y, test_y = \<br>
+        x[:train_size], x[train_size:], \<br>
+        y[:train_size], y[train_size:]<br>
+        #训练随机森林模型：<br>
+        model = se.RandomForestRegressor \<br>
+        (max_depth=10, n_estimators=1000, min_samples_split=2)<br>
+        model.fit(train_x,train_y)<br>
+        #输出结果r2得分：<br>
+        pred_test_y = model.predict(test_x)<br>
+        print(sm.r2_score(test_y, pred_test_y))<br>
+        day_fi = model.feature_importances_<br>
+        #再补上特征重要性的可视化代码。(画图)<br>
         </p>
     </div>
 
     <div class="content" name="disableCopyPaste">
-        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <h3>人工分类：</h3>
         <br>
         <p class="explain">
         <h4>&emsp;解说</h4>
-        # 给出阈值，获取二值化器<br>
-        bin = sp.Binarizer(threshold = 阈值)<br>
-        # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
-        result = bin.transform(原始图片样本转化的矩阵)<br>
+        通过已知的模型，将数据进行分类，预测接下来一组数据是哪一类（离散的）。<br>
+        这里就相当于用if……else……进行判断，比较简单<br>
         </p>
         <br>
         <p class="code">
         <h4>&emsp;举例</h4>
         import numpy as np<br>
-        import sklearn.preprocessing as sp<br>
-        ary = np.array([[10,21,5],<br>
-        [2,4,1],<br>
-        [11,18,18]])<br>
-        bin = sp.Binarizer(threshold = 10)<br>
-        result = bin.transform(ary)<br>
+        import matplotlib.pyplot as mp<br>
+        x = np.array([<br>
+        [3,1],
+        [2,5],
+        [1,8],
+        [6,4],
+        [5,2],
+        [3,5],
+        [4,7],
+        [4,-1]])
+        y = np.array([0,1,1,0,0,1,1,0])<br>
+        l, r = x[:,0].min() - 1, x[:,0].max() + 1<br>
+        b, t = x[:,1].min() - 1, x[:,1].max() + 1<br>
+        # l是第一列的最小值-1，r是第一列的最大值+1<br>
+        # b是第二列的最小值-1，t是第二列的最大值+1 上下左右边界<br>
+        # 绘制分类边界线：<br>
+        n = 500<br>
+        # 划分可视区间<br>
+        grid_x, grid_y = np.meshgrid(np.linspace(l,r,n), np.linspace(b,t,n))<br>
+        # 行数，列数各自拆成n份<br>
+        grid_z = np.piecewise(grid_x, [grid_x > grid_y, grid_x < grid_y],[0, 1]) <br>
+        # piecewise: 首先是传入grid_x,如果他服从第一个条件grid_x>grid_y，返回前者1，否则返回0<br>
+        # 画图：<br>
+        mp.figure('Simple Classification', facecolor='lightgray')<br>
+        mp.title('Simple Classification', fontsize=16)<br>
+        mp.xlabel('x',fontsize=14)<br>
+        mp.ylabel('y',fontsize=14)<br>
+        mp.tick_params(labelsize = 10)<br>
+        mp.pcolormesh(grid_x, grid_y, grid_z, cmap='gray')<br>
+        mp.scatter(x[:,0],x[:,1], c=y , cmap='brg' ,label='Sample points',s=80, zorder = 3)<br>
+        # cmap是用颜色来区分的，具体用法可以借鉴网站：https://blog.csdn.net/weixin_39580795/article/details/102622004<br>
+        # zorder是关于图层的显示顺序<br>
+        mp.legend()<br>
+        mp.show()<br>
         </p>
     </div>
 
