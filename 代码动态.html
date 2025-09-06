@@ -745,30 +745,477 @@
     </div>
 
     <div class="content" name="disableCopyPaste">
-        <h3>二值化：图片像素编码，事先要给定阈值</h3>
+        <h3>逻辑分类：</h3>
         <br>
         <p class="explain">
         <h4>&emsp;解说</h4>
-        # 给出阈值，获取二值化器<br>
+        通过输入数据，基于多元线性回归模型求出线性预测方程（y = w0 + w1x1 + w2x2 ）<br>
+        但是线性方程返回的是连续预测值，那么我们需要一个连续到离散的转换，<br>
+        根据实数的稠密性，负无穷到正无穷可以一一对应到【0，1】区间 <br>
+        逻辑函数 z = 1 / (1 + exp(-y))  z看作被划分为1类的概率     很重要！！！！<br>
+        <br>
         bin = sp.Binarizer(threshold = 阈值)<br>
         # 调用transform方法对原始样本矩阵进行二值化预处理操作<br>
         result = bin.transform(原始图片样本转化的矩阵)<br>
+            <br>
+        import sklearn.linear_model as lm<br>
+        model = lm.LogisticRegression(solver='liblinear', c=正则强度)<br>
+        # solver：逻辑函数中指数的函数关系<br>
+        # c：防止过拟合，正则越大拟合效果越小<br>
+        model.fit(训练输入集，训练输出集)<br>
+        result = model.predict(待预测输入集)<br>
         </p>
         <br>
         <p class="code">
         <h4>&emsp;举例</h4>
         import numpy as np<br>
-        import sklearn.preprocessing as sp<br>
-        ary = np.array([[10,21,5],<br>
-        [2,4,1],<br>
-        [11,18,18]])<br>
-        bin = sp.Binarizer(threshold = 10)<br>
-        result = bin.transform(ary)<br>
+        import matplotlib.pyplot as mp<br>
+        import sklearn.linear_model as lm<br>
+        # 8个样本训练<br>
+        x = np.array([<br>
+            [3,1],<br>
+            [2,5],<br>
+            [1,8],<br>
+            [6,4],<br>
+            [5,2],<br>
+            [3,5],<br>
+            [4,7],<br>
+            [4,-1]])<br>
+        y = np.array([0,1,1,0,0,1,1,0])<br>
+        model = lm.LogisticRegression(solver='liblinear',C=1)<br>
+        model.fit(x,y)<br>
+        x_test = []<br>
+        for i in range(-50,50):<br>
+            for j in range(-50,50):<br>
+                x_test.append([i,j])<br>
+        r = model.predict(x_test)<br>
+        #经过检验，如果说和是偶数输出1，奇数输出0，逻辑回归不太能做到<br>
+        <br>
+        n = 500<br>
+        # 划分可视区间<br>
+        l, r = x[:,0].min() - 1, x[:,0].max() + 1<br>
+        b, t = x[:,1].min() - 1, x[:,1].max() + 1<br>
+        grid_x, grid_y = np.meshgrid(np.linspace(l,r,n), np.linspace(b,t,n))<br>
+        mesh_x = np.column_stack([grid_x.ravel(), grid_y.ravel()])<br>
+        # 列合并 250000*2<br>
+        mesh_z = model.predict(mesh_x)<br>
+        grid_z = mesh_z.reshape(grid_x.shape)<br>
+        # 画图：<br>
+        mp.figure('Simple Classification', facecolor='lightgray')<br>
+        mp.title('Simple Classification', fontsize=16)<br>
+        mp.xlabel('x',fontsize=14)<br>
+        mp.ylabel('y',fontsize=14)<br>
+        mp.tick_params(labelsize = 10)<br>
+        mp.pcolormesh(grid_x, grid_y, grid_z, cmap='gray')<br>
+        mp.scatter(x[:,0],x[:,1], c=y , cmap='brg' ,label='Sample points',s=80, zorder = 3)<br>
+        # cmap是用颜色来区分的，具体用法可以借鉴网站：https://blog.csdn.net/weixin_39580795/article/details/102622004<br>
+        # zorder是关于图层的显示顺序<br>
+        mp.legend()<br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>多元分类：</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        基于二元分类，训练出一个判断是否为A类别，在用同样方法看是不是B和C类别。<br>
+        问题：那么如果还是上面那个公式，概率会不会差很多，先判断的类别，在这个集合中的概率大<br>
+        下面代码会发现偏心严重，存在过拟合，对训练样本效果好，但是测试样本不好，所以参数C可以放大一点<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        import sklearn.linear_model as lm<br>
+        # 8个样本训练<br>
+        x = np.array([<br>
+            [4,7],<br>
+            [3.5,8],<br>
+            [3.1,6.2],<br>
+            [0.5,1],<br>
+            [1,2],<br>
+            [1.2,1.9],<br>
+            [6,2],<br>
+            [5.7,1.5],<br>
+            [5.4,2.2]])<br>
+        y = np.array([0,0,0,1,1,1,2,2,2])<br>
+        model = lm.LogisticRegression(solver='liblinear',C=1)<br>
+        model.fit(x,y)<br>
+        x_test = []<br>
+        for i in range(-50,50):<br>
+            for j in range(-50,50):<br>
+                x_test.append([i,j])<br>
+        r = model.predict(x_test)<br>
+        <br>
+
+        n = 500<br>
+        # 划分可视区间<br>
+        l, r = x[:,0].min() - 1, x[:,0].max() + 1<br>
+        b, t = x[:,1].min() - 1, x[:,1].max() + 1<br>
+        grid_x, grid_y = np.meshgrid(np.linspace(l,r,n), np.linspace(b,t,n))<br>
+        mesh_x = np.column_stack([grid_x.ravel(), grid_y.ravel()])<br>
+        # 列合并 250000*2<br>
+        mesh_z = model.predict(mesh_x)<br>
+        grid_z = mesh_z.reshape(grid_x.shape)<br>
+        # 画图：<br>
+        mp.figure('Simple Classification', facecolor='lightgray')<br>
+        mp.title('Simple Classification', fontsize=16)<br>
+        mp.xlabel('x',fontsize=14)<br>
+        mp.ylabel('y',fontsize=14)<br>
+        mp.tick_params(labelsize = 10)<br>
+        mp.pcolormesh(grid_x, grid_y, grid_z, cmap='gray')<br>
+        mp.scatter(x[:,0],x[:,1], c=y , cmap='brg' ,label='Sample points',s=80, zorder = 3)<br>
+        # cmap是用颜色来区分的，具体用法可以借鉴网站：https://blog.csdn.net/weixin_39580795/article/details/102622004<br>
+        # zorder是关于图层的显示顺序<br>
+        mp.legend()<br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>朴素（特征值独立）贝叶斯分类（https://zhuanlan.zhihu.com/p/37575364）</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        依据统计概率理论实现的一种分类方式，整理相同特征值的样本，决策树的思想。取概率高的作为最后输出的类别。<br>
+        和决策树的区别：<br>
+        * 决策树的构建过程是递归的，通过选择最优特征和划分数据集来生成树。<br>
+        * 决策树易于理解和解释，但容易过拟合。<br>
+        * 贝叶斯分类是一种基于贝叶斯定理的分类方法，通过计算后验概率来进行分类。<br>
+        * 贝叶斯分类假设特征之间相互独立，根据特征的条件概率计算后验概率，选择具有最大后验概率的类别作为分类结果。<br>
+        <br>
+        贝叶斯定理：P(A|B)=P(B|A)P(A)/P(B)，所以各个特征要独立[P(B|A) = 1/3]，所以少量数据不准<br>
+        应用：P(A,B,C,D) = P(A|B,C,D) * P(B,C,D) = P(A|B,C,D) * P(B|C,D) * P(C,D)<br>
+                        = P(A|B,C,D) * P(B|C,D) * P(C|D) * P(D)<br>
+                        = 1/Z * P(A|D) * P(B|D) * P(C|D) * P(D)<br>
+        <br>
+        相关API：<br>
+        # 创建高斯分布朴素贝叶斯分类器：<br>
+        model = nb.GaussianNB()<br>
+        model.fit(x,y)<br>
+        result = model.predict(samples)<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        import numpy as np<br>
+        import sklearn.naive_bayes as nb<br>
+        import matplotlib.pyplot as mp<br>
+        <br>
+        data = np.loadtxt("bayes_eg.txt",delimiter=",")<br>
+        x = data[:,:2].astype('f8')<br>
+        y = data[:,-1].astype('f8')<br>
+        print(x.shape, y.shape)<br>
+        model = nb.GaussianNB()<br>
+        model.fit(x,y)<br>
+        # 划分可视区间<br>
+        l, r = x[:,0].min() - 1, x[:,0].max() + 1<br>
+        b, t = x[:,1].min() - 1, x[:,1].max() + 1<br>
+        n = 500<br>
+        grid_x, grid_y = np.meshgrid(np.linspace(l,r,n), np.linspace(b,t,n))<br>
+        mesh_x = np.column_stack([grid_x.ravel(), grid_y.ravel()])<br>
+        mesh_z = model.predict(mesh_x)<br>
+        grid_z = mesh_z.reshape(grid_x.shape)<br>
+        # 画图<br>
+        mp.figure('Naive Bayes Classification', facecolor='lightgray')<br>
+        mp.title('Naive Bayes Classification', fontsize=16)<br>
+        mp.xlabel('x',fontsize=14)<br>
+        mp.ylabel('y',fontsize=14)<br>
+        mp.pcolormesh(grid_x, grid_y, grid_z, cmap='gray')<br>
+        mp.scatter(x[:,0],x[:,1], c=y , cmap='brg' ,label='Sample points',s=80)<br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>朴素贝叶斯分类——数据集划分</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        上面的txt数据，分布成训练集和测试集。但是分类不能随便拆数据。（没学不能硬要预测）<br>
+        <br>
+        相关API：<br>
+        <br>
+        import sklearn.model_selection as ms<br>
+        train_x, test_x, train_y, test_y = 
+                ms.train_test_split(input, output, 
+                        test_size = 测试集占比, random_state = 随机种子)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>朴素贝叶斯分类——交叉验证</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        数据划分具有不确定性，万一划分全在特殊样本上，则可信度遭受质疑。<br>
+        所以先等分成n份，不同数据作为训练集交叉验证，<br>
+        <br>
+        相关API：<br>
+        <br>
+        import sklearn.model_selection as ms<br>
+        指标值数组 = ms.cross_val_score(模型，输入集，输出集，
+                                        cv=折叠数（交叉验证次数）,scoring = 指标名)<br>
+                                    <br>
+        指标名：accuracy:精确度 = 正确/总<br>
+            precision_weighted:查准率 = 针对一个类类别， 预测正确/预测总样本<br>
+            recall_weighted:召回率 = 针对一个类别预测正确/该类别实际存在总数<br>
+            f1_weighted:f1得分 = 2 * precision_weighted * recall_weighted/<br>
+                                    (precision_weighted + recall_weighted)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>朴素贝叶斯分类——混淆矩阵</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        属于评估算法，行是类别，列是预测类别。<br>
+        查准率 = 主对角线上值 / 该值所在列的和<br>
+        召回率 = 主对角线上值 / 该值所在行的和<br>
+        <br>
+        相关API:<br>
+        <br>
+        import sklearn.metrics as sm<br>
+        混淆矩阵 = sm.confusion_matrix(实际输出，预测输出)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>朴素贝叶斯分类——分类报告（上述的集合）</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        import sklearn.metrics as sm<br>
+        cr = sm.classification_report(实际输出，预测输出)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>决策树分类</h3>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        回归——求均值；分类——投票<br>
+        <br>
+        例：小汽车分类——随机森林分类器<br>
+        # 读取文本数据，对每一列进行标签编码<br>
+        # 整理样本空间，输入集和输出集<br>
+        <br>
+        import numpy as np<br>
+        import sklearn.preprocessing as sp    # 标签编码<br>
+        import sklearn.ensemble as se    # 随机森林<br>
+        import sklearn.model_selection as ms    # 交叉验证<br>
+        <br>
+        data = []<br>
+        with open('决策树分类.txt','r') as f:<br>
+            for line in f.readlines():<br>
+                #注意不是readline而是readlines，read和readline是str类型，readlines是list类型<br>
+                data.append(line[:-1].split(','))       # [:-1]是为了删掉最后的\n<br>
+        data = np.array(data)<br>
+        print(data.shape)<br>
+        <br>
+        train_x, train_y = [],[]<br>
+        encoders = []   # 标签编码储存器<br>
+        for index,row in enumerate(data.T):    # 遍历的时候增加一个下标<br>
+            encoder = sp.LabelEncoder()<br>
+            if index < (len(data.T)-1):    # 添加到输入集<br>
+                train_x.append(encoder.fit_transform(row))<br>
+            else:<br>
+                train_y = encoder.fit_transform(row)<br>
+            encoders.append(encoder)<br>
+        <br>
+        train_x = np.array(train_x).T<br>
+        train_y = np.array(train_y)<br>
+        <br>
+        print(train_x.shape, train_y.shape)<br>
+        # 训练随机森林分类器模型<br>
+        model = se.RandomForestClassifier(max_depth=6, n_estimators=100, random_state=7)<br>
+        score = ms.cross_val_score(model,train_x,train_y,cv=2,scoring='f1_weighted')<br>
+        print(score.mean())<br>
+        model.fit(train_x, train_y)<br>
+        # 自定义测试数据，用训练好的模型测试<br>
+        data = []<br>
+        data = np.array(data)<br>
+        test_x = []<br>
+        test_y = []<br>
+        for index,row in enumerate(data.T):    # 遍历的时候增加一个下标<br>
+            encoder = encoders[index]<br>
+            if index < (len(data.T) - 1):    # 添加到输入集<br>
+                test_x.append(encoder.fit_transform(row))<br>
+            else:<br>
+                test_y = encoder.fit_transform(row)<br>
+        test_x = np.array(test_x).T<br>
+        test_y = np.array(test_y)<br>
+        pred_test_y = model.predict(test_x)<br>
+        print(encoder[-1].inverse_transform(test_y))<br>
+        print(encoder[-1].inverse_transform(pred_test_y))<br>
+        <br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>验证曲线：（调参）</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        验证曲线：模型性能 = f(超参数)，但同时也要考虑模型的简单程度，不完全是追求精确度最高<br>
+
+        相关API：<br>
+            train_scores, test_scores = ms.validation_curve(
+                model,
+                输入集， 输出集，
+                'n_estimators'           # 超参数名（决策树棵数）
+                np.arange(50,550,50)        # 超参数序列
+                cv = 5      # 折叠数
+                )<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        用上面小汽车案例：（可以去掉交叉验证，因为本身就是f1得分）<br>
+        <br>
+        import matplotlib.pyplot as mp<br>
+        import sklearn.model_selection as ms<br>
+        train_scores, test_scores = ms.validation_curve(model, train_x, train_y,
+                            'n_estimator', np.arange(50,500,50),cv = 5)<br>
+        print(test_scores.mean(axis=1))<br>
+        mp.scatter(np.arange(50,500,50),test_scores.mean(axis=1))<br>
+        mp.legend()<br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>学习曲线：</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        学习曲线：模型性能 = f（训练集大小）<br>
+        <br>
+        相关API：<br>
+        _, train_scores, test_scores = ms.learning_curve(    # 返回值有三个，但是第一个没用
+            model,  # 模型
+            输入集，输出集，
+            train_sizes = [0.9,0.8,0.7]  # 训练集大小序列
+            cv = 5  # 折叠数
+            )<br>
+        <br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例</h4>
+        用上面小汽车案例：（在随机森林代码后面）<br>
+        <br>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        import sklearn.model_selection as ms<br>
+        ms.learning_curve(
+            model,train_x,train_y,
+            train_sizes=np.arange(0.1,1,0.1),
+            cv = 5
+            )<br>
+        test_mean = test_scores.mean(axis=1)<br>
+        <br>
+        mp.grid(linestyle=':')<br>
+        mp.scatter(train_sizes, test_mean)<br>
+        mp.show()<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>支持向量机（SVM）</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        * 寻求最优分类边界：正确、泛化、公平、简单（线性） <br>
+        最近两点做平行线，距离最远<br>
+        * 基于核函数的升维变换（线性不可分，那么n维样本用n+1维分）<br>
+        线性核函数，不通过核函数提升维度，仅在原始维度中寻求线性分类边界<br>
+        多项式核函数：<br>
+        径向基核函数：通过高斯分布增加原始样本特征的分布概率<br>
+        举例：<br>
+        序号  数据  自己造的特征（防止重合，如y = 2*x*x+3*x+4 ）  <br>
+        1 0 x<br>
+        2 0 x<br>
+        3 1 x<br>
+        4 1 x<br>
+        5 0 x<br>
+        6 0 x<br>
+        <br>
+        API：<br>
+        <br>
+        import sklearn.svm as svm<br>
+        model = svm.SVC(kernal='linear')    <br>
+                #或者kernal='poly',degree=3; 或者kernel=‘rbf’,C(正则)=600,gamma=0.01<br>
+        model.fit(x,y)<br>
+        pre_test_y = model.predict(test_x)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>支持向量机——样本类别均衡化</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        通过类别权重的均衡化，让占比小的样本权重变高，平均化各类样本对分类模型的贡献，提高模型性能。 <br>
+        样本不均衡可以用上采样和下采样的方法。<br>
+        <br>
+        相关API：<br>
+        model = svm.SVC(kernel='linear',class_weight='balanced')<br>
+        model.fit(train_x,train_y)<br>
+        </p>
+    </div>
+
+    <div class="content" name="disableCopyPaste">
+        <h3>支持向量机——置信概率</h3>
+        <br>
+        <p class="explain">
+        <h4>&emsp;解说</h4>
+        根据样本距离边界的远近，量化预测的可信程度，离边界越近，置信概率越低。<br>
+        <br>
+        API:<br>
+        在获取模型的时候，给出超参数probability=True<br>
+        model = svm.SVC(kernel='rbf', C=600, gamma=0.01, probability=True)<br>
+        预测结果 = model.predict(输入样本矩阵)<br>
+        调用model.predict_proba(样本矩阵)获取置信区间<br>
+        </p>
+        <br>
+        <p class="code">
+        <h4>&emsp;举例(续)</h4>
+        import numpy as np<br>
+        import matplotlib.pyplot as mp<br>
+        prob_x = np.array([<br>
+            [2,1.5],<br>
+            [8,9],<br>
+            [4.8,5.2]<br>
+        ])<br>
+        pred_prob_y = model.predict_proba(prob_x)<br>
+        print(pred_prob_y)<br>
+        mp.scatter(prob_x[:,0], prob_x[:,1], marker='D', c=pred_prob_y, cmap='jet_r', s=80)<br>
+        for i in range(len(pred_prob_y)):<br>
+            mp.annotate(
+                '{}% {}%'.format(
+                    round(pred_prob_y[i,0]*100,2),
+                    round(pred_prob_y[1,1]*100,2)
+                ),<br>&emsp;
+                xy = (prob_x[i,0], prob_x[i,1]),
+                xytext = (12,-12),
+                textcoords = 'offset points',
+                horizontalalognment = 'left',
+                verticalalignment = 'left',
+                fontsize = 9,<br>&emsp;
+                bbox={'boxstyle':'round,pad=0.6',
+                        'fc':'orange','alpha':0.8}
+            )<br>
         </p>
     </div>
 
     <div class="content">
-        <h1>剩下的代码之后再拷贝上传</h1>
+        <h1>后续关于ANN、CNN、RNN的代码由于没有备份，之后再补上</h1>
     </div>
 
     <script>
