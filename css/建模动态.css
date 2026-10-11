@@ -138,18 +138,19 @@
 /*----*/
 
 .content {
-    width: 1200px;
+    width: 1300px;
     margin: 0 0;
     line-height: normal;
 }
 
 .notice {
-    margin-left: 144px;
-    width: 1100px;
+    margin-left: 90px;
+    width: 1250px;
     height: 654.4px;
 }
 
 .title {
+    width: 1300px;
     margin-top: 31px;
     padding-bottom: 10px;
 }
@@ -165,30 +166,53 @@
 }
 
 /*以下是建模动态*/
+.bound {
+    width: 1400px;
+    margin-top: 31px;
+    padding-bottom: 10px;
+}
+
+
+.block {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 800px;
+    height: 450px;
+}
+
+.block2 {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 800px;
+    height: 550px;
+}
+
 .block_l {
     float: left;
     margin-left: 10px;
     margin-right: 10px;
-    width: 530px;
-    height: 350px;
+    width: 600px;
+    height: 360px;
 }
 
 .block_l h3 {
     color: #003f88;
     text-align: center;
+    margin-top: -1px;
 }
 
 .block_r {
     float: right;
     margin-left: 10px;
     margin-right: 10px;
-    width: 530px;
-    height: 350px;
+    width: 600px;
+    height: 360px;
 }
 
 .block_r h3 {
     color: #003f88;
     text-align: center;
+    margin-top: -1px;
 }
 
 .block_r h1 {
